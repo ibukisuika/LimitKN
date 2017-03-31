@@ -1,0 +1,16 @@
+target/
+**/target/**
+**/.settings/**
+.project
+.classpath
+.settings/
+.idea
+*.iml
+*.ipr
+*.iws
+*.tree
+*.class
+*.log
+*.swp
+.DS_Store
+MANIFEST.MF

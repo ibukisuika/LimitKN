@@ -44,25 +44,34 @@ public class TopKN implements KNLimit {
         }
     }
 
+    /**
+     * Read in the original data, process the data into buckets, and write the config file(to store the size of each
+     * bucket)
+     * @throws IOException
+     */
     private void preProcess() throws IOException {
-        preProcess(PATH + "TestIn.small");
-        //preProcess("xx1");
-        //preProcess("xx2");
-        //preProcess("xx3");
+        processOriginFile(PATH + "TestIn.small");
+        //processOriginFile(PATH + "TestIn.small1");
+        //processOriginFile(PATH + "TestIn.small2");
 
         Writer writer = new Writer(PATH + "config");
         for (int i = 0; i < BUCKET_SIZE; i++) {
             writer.writeInt(counter[i]);
-            Writer dataWritter = new Writer(PATH + "temp" + i);
+            Writer dataWriter = new Writer(PATH + "temp" + i);
             for (int j = 0; j < counter[i]; j++) {
-                dataWritter.writeLong(data[i][j]);
+                dataWriter.writeLong(data[i][j]);
             }
-            dataWritter.close();
+            dataWriter.close();
         }
         writer.close();
     }
 
-    private void preProcess(String path) throws IOException {
+    /**
+     * Process one original file into memory.
+     * @param path  the file path.
+     * @throws IOException
+     */
+    private void processOriginFile(String path) throws IOException {
         Reader reader = new Reader(path);
         long a;
         while ((a = reader.nextLong()) != -1) {
@@ -74,6 +83,13 @@ public class TopKN implements KNLimit {
         }
     }
 
+    /**
+     * The find part.
+     * Read from temp files according to the config, then do sort and find the TopKN.
+     * @param k
+     * @param n
+     * @throws IOException
+     */
     private void findKN(int k, int n) throws IOException {
         int i = 0;
         while (k > counter[i]) {
@@ -98,6 +114,11 @@ public class TopKN implements KNLimit {
         }
     }
 
+    /**
+     * Entry point of the whole contest.
+     * @param args
+     * @throws IOException
+     */
     public static void main(String[] args) throws IOException {
 
         //if (args.length != 2) {

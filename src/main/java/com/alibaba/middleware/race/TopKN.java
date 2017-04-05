@@ -1,7 +1,6 @@
 package com.alibaba.middleware.race;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
@@ -12,13 +11,16 @@ import java.util.Arrays;
  * @author kliner
  */
 public class TopKN implements KNLimit {
+    private final static String TEAMCODE = "70124p8zo9";
+    private final static int BUCKET_SIZE = 1 << 12;
+    private final static long MASK = 1L << 51;
 
-    private final static String PATH = "/Users/kliner/work/LimitKN/data/";
-    private final static int BUCKET_SIZE = 1024;
-    private final static long MASK = (0x7FFFFFFFFFFFFFFFL) / BUCKET_SIZE;
+    static String DATA_PATH = "/home/admin/topkn-datafiles/";
+    static String TEMP_PATH = "/home/admin/middle/" + TEAMCODE + "/";
+    static String OUTPUT_PATH = "/home/admin/topkn-resultfiles/" + TEAMCODE + "/";
 
     private int[] counter = new int[BUCKET_SIZE];
-    private long[][] data = new long[BUCKET_SIZE][60000];
+    private long[][] data = new long[BUCKET_SIZE][32768];
     private long[] ans = new long[100];
 
     @Override
@@ -26,16 +28,24 @@ public class TopKN implements KNLimit {
         try {
             init();
             findKN((int)k, n);
-            System.out.println(Arrays.toString(ans));
+            output(n);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    private void output(int n) throws IOException {
+        Writer writer = new Writer(OUTPUT_PATH + "RESULT.rs");
+        for (int i = 0; i < n; i++) {
+            writer.writeLong(ans[i]);
+        }
+        writer.close();
+    }
+
     private void init() throws IOException {
-        File f = new File(PATH + "config");
+        File f = new File(TEMP_PATH + "config");
         if (f.exists()) {
-            Reader reader = new Reader(PATH + "config");
+            Reader reader = new Reader(TEMP_PATH + "config");
             for (int i = 0; i < BUCKET_SIZE; i++) {
                 counter[i] = reader.nextInt();
             }
@@ -51,12 +61,18 @@ public class TopKN implements KNLimit {
      * @throws IOException
      */
     private void preProcess() throws IOException {
-        processOriginFile(PATH + "TestIn.small");
-        processOriginFile(PATH + "TestIn.small");
-        //processOriginFile(PATH + "TestIn.small1");
-        //processOriginFile(PATH + "TestIn.small2");
+        processOriginFile(DATA_PATH + "KNLIMIT_0.data");
+        processOriginFile(DATA_PATH + "KNLIMIT_1.data");
+        processOriginFile(DATA_PATH + "KNLIMIT_2.data");
+        processOriginFile(DATA_PATH + "KNLIMIT_3.data");
+        processOriginFile(DATA_PATH + "KNLIMIT_4.data");
+        processOriginFile(DATA_PATH + "KNLIMIT_5.data");
+        processOriginFile(DATA_PATH + "KNLIMIT_6.data");
+        processOriginFile(DATA_PATH + "KNLIMIT_7.data");
+        processOriginFile(DATA_PATH + "KNLIMIT_8.data");
+        processOriginFile(DATA_PATH + "KNLIMIT_9.data");
 
-        Writer writer = new Writer(PATH + "config");
+        Writer writer = new Writer(TEMP_PATH + "config");
         for (int i = 0; i < BUCKET_SIZE; i++) {
             writer.writeInt(counter[i]);
         }
@@ -83,7 +99,7 @@ public class TopKN implements KNLimit {
 
         // store data into temp file and global counter
         for (int i = 0; i < BUCKET_SIZE; i++) {
-            Writer dataWriter = new Writer(PATH + "temp" + i);
+            Writer dataWriter = new Writer(TEMP_PATH + "temp" + i);
             for (int j = 0; j < tempCounter[i]; j++) {
                 dataWriter.writeLong(data[i][j]);
             }
@@ -107,7 +123,7 @@ public class TopKN implements KNLimit {
             i++;
         }
 
-        Reader reader = new Reader(PATH + "temp" + i);
+        Reader reader = new Reader(TEMP_PATH + "temp" + i);
         long[] innerData = reader.readLongs(counter[i]);
         Arrays.sort(innerData);
         for (int t = 0; t < n; t++) {
@@ -115,7 +131,7 @@ public class TopKN implements KNLimit {
                 ans[t] = i * MASK + innerData[t + k];
             } else {
                 i++;
-                reader = new Reader(PATH + "temp" + i);
+                reader = new Reader(TEMP_PATH + "temp" + i);
                 innerData = reader.readLongs(counter[i]);
                 Arrays.sort(innerData);
                 k = -t;
@@ -131,24 +147,10 @@ public class TopKN implements KNLimit {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-
-        //if (args.length != 2) {
-        //    throw new InvalidParameterException("Please give the right paramaters 'k' and 'n'.");
-        //}
-
-        //String teamCode = "543611iu4h";
-        //String middleFileName = "middleThing.txt";
-        //File middleFile = new File(KNLimit.MIDDLE_DIR + teamCode + File.separator + middleFileName);
-        //FileWriter fileWriter = new FileWriter(middleFile);
-        //fileWriter.write("hello world");
-        //fileWriter.close();
-
-        long time = System.currentTimeMillis();
-        TopKN demo = new TopKN();
-        demo.processTopKN(100000, 100);
-        System.out.println(System.currentTimeMillis() - time);
-        //demo.processTopKN(Long.valueOf(args[0]), Integer.valueOf(args[1]));
-
+        if (args.length != 2) {
+            throw new InvalidParameterException("Please give the right paramaters 'k' and 'n'.");
+        }
+        TopKN topKN = new TopKN();
+        topKN.processTopKN(Long.valueOf(args[0]), Integer.valueOf(args[1]));
     }
-
 }

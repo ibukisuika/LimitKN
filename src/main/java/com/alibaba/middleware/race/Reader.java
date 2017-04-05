@@ -13,8 +13,8 @@ public class Reader {
     private byte[] buffer;
     private int bufferPointer, bytesRead;
 
-    public Reader(String file_name) throws IOException {
-        din = new DataInputStream(new FileInputStream(file_name));
+    public Reader(String filename) throws IOException {
+        din = new DataInputStream(new FileInputStream(filename));
         buffer = new byte[BUFFER_SIZE];
         bufferPointer = bytesRead = 0;
     }

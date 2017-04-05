@@ -13,9 +13,8 @@ public class Writer {
 
     private FileWriter fileWriter;
 
-    public Writer(String s) throws IOException {
-        File middleFile = new File(s);
-        fileWriter = new FileWriter(middleFile);
+    public Writer(String filename) throws IOException {
+        fileWriter = new FileWriter(filename, true);
     }
 
     public void writeInt(int i) throws IOException {

@@ -47,9 +47,11 @@ public class TopKN implements KNLimit {
     /**
      * Read in the original data, process the data into buckets, and write the config file(to store the size of each
      * bucket)
+     *
      * @throws IOException
      */
     private void preProcess() throws IOException {
+        processOriginFile(PATH + "TestIn.small");
         processOriginFile(PATH + "TestIn.small");
         //processOriginFile(PATH + "TestIn.small1");
         //processOriginFile(PATH + "TestIn.small2");
@@ -57,35 +59,43 @@ public class TopKN implements KNLimit {
         Writer writer = new Writer(PATH + "config");
         for (int i = 0; i < BUCKET_SIZE; i++) {
             writer.writeInt(counter[i]);
-            Writer dataWriter = new Writer(PATH + "temp" + i);
-            for (int j = 0; j < counter[i]; j++) {
-                dataWriter.writeLong(data[i][j]);
-            }
-            dataWriter.close();
         }
         writer.close();
     }
 
     /**
      * Process one original file into memory.
-     * @param path  the file path.
+     *
+     * @param path the file path.
      * @throws IOException
      */
     private void processOriginFile(String path) throws IOException {
+        int[] tempCounter = new int[BUCKET_SIZE];
         Reader reader = new Reader(path);
         long a;
         while ((a = reader.nextLong()) != -1) {
             int bucket = (int)(a / MASK);
             long remain = a % MASK;
-            int i = counter[bucket];
+            int i = tempCounter[bucket];
             data[bucket][i] = remain;
-            counter[bucket]++;
+            tempCounter[bucket]++;
+        }
+
+        // store data into temp file and global counter
+        for (int i = 0; i < BUCKET_SIZE; i++) {
+            Writer dataWriter = new Writer(PATH + "temp" + i);
+            for (int j = 0; j < tempCounter[i]; j++) {
+                dataWriter.writeLong(data[i][j]);
+            }
+            dataWriter.close();
+            counter[i] += tempCounter[i];
         }
     }
 
     /**
      * The find part.
      * Read from temp files according to the config, then do sort and find the TopKN.
+     *
      * @param k
      * @param n
      * @throws IOException
@@ -116,6 +126,7 @@ public class TopKN implements KNLimit {
 
     /**
      * Entry point of the whole contest.
+     *
      * @param args
      * @throws IOException
      */

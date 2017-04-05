@@ -35,6 +35,8 @@ public class TopKN implements KNLimit {
     }
 
     private void output(int n) throws IOException {
+        File f = new File(OUTPUT_PATH + "RESULT.rs");
+        if (f.exists()) { f.delete(); }
         Writer writer = new Writer(OUTPUT_PATH + "RESULT.rs");
         for (int i = 0; i < n; i++) {
             writer.writeLong(ans[i]);

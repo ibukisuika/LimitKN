@@ -5,17 +5,6 @@
     <version>1.0</version>
     <name>limitkndemo</name>
 
-
-    <!--提交代码的时候，去掉该依赖-->
-    <dependencies>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>21.0</version>
-        </dependency>
-    </dependencies>
-
-
     <build>
 
         <directory>target</directory>

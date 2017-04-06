@@ -51,6 +51,7 @@ public class TopKN implements KNLimit {
             for (int i = 0; i < BUCKET_SIZE; i++) {
                 counter[i] = reader.nextInt();
             }
+            reader.close();
         } else {
             preProcess();
         }
@@ -98,12 +99,13 @@ public class TopKN implements KNLimit {
             data[bucket][i] = remain;
             tempCounter[bucket]++;
         }
+        reader.close();
 
         // store data into temp file and global counter
         for (int i = 0; i < BUCKET_SIZE; i++) {
             Writer dataWriter = new Writer(TEMP_PATH + "temp" + i);
             for (int j = 0; j < tempCounter[i]; j++) {
-                dataWriter.writeLong(data[i][j]);
+                dataWriter.writeHexLong(data[i][j]);
             }
             dataWriter.close();
             counter[i] += tempCounter[i];
@@ -126,7 +128,8 @@ public class TopKN implements KNLimit {
         }
 
         Reader reader = new Reader(TEMP_PATH + "temp" + i);
-        long[] innerData = reader.readLongs(counter[i]);
+        long[] innerData = reader.readHexLongs(counter[i]);
+        reader.close();
         Arrays.sort(innerData);
         for (int t = 0; t < n; t++) {
             if (t + k < counter[i]) {
@@ -134,7 +137,8 @@ public class TopKN implements KNLimit {
             } else {
                 i++;
                 reader = new Reader(TEMP_PATH + "temp" + i);
-                innerData = reader.readLongs(counter[i]);
+                innerData = reader.readHexLongs(counter[i]);
+                reader.close();
                 Arrays.sort(innerData);
                 k = -t;
                 ans[t] = i * MASK + innerData[t + k];
@@ -152,7 +156,9 @@ public class TopKN implements KNLimit {
         if (args.length != 2) {
             throw new InvalidParameterException("Please give the right paramaters 'k' and 'n'.");
         }
+        long t = System.currentTimeMillis();
         TopKN topKN = new TopKN();
         topKN.processTopKN(Long.valueOf(args[0]), Integer.valueOf(args[1]));
+        System.out.println(System.currentTimeMillis() - t);
     }
 }

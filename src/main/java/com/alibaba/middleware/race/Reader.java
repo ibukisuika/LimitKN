@@ -40,6 +40,18 @@ public class Reader {
         return ret;
     }
 
+    public long nextHexLong() throws IOException {
+        long ret = 0;
+        byte c = read();
+        if (c == -1) { return -1; }
+        ret = c & 0xff;
+        for (int i = 0; i < 7; i++) {
+            c = read();
+            ret = (ret << 8) + (c & 0xff);
+        }
+        return ret;
+    }
+
     public long nextLong() throws IOException {
         long ret = 0;
         byte c = read();
@@ -66,10 +78,10 @@ public class Reader {
         din.close();
     }
 
-    public long[] readLongs(int size) throws IOException {
+    public long[] readHexLongs(int size) throws IOException {
         long[] ret = new long[size];
         for (int i = 0; i < size; i++) {
-            ret[i] = nextLong();
+            ret[i] = nextHexLong();
         }
         return ret;
     }
